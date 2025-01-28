@@ -1,6 +1,9 @@
 const asyncErrorHandler = (requestHandler) => {
+
     return (req, res, next) => {
-        requestHandler(req, res, next).catch(err => next(err))
+
+
+        return requestHandler(req, res, next).catch(err => next(err))
     }
 }
 
