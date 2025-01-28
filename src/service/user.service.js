@@ -1,3 +1,4 @@
+import * as argon2 from "argon2"
 import prisma from "../../prisma/client/prismaClient.js"
 import CustomError from "../utils/customErrorHandler.js"
 
@@ -15,8 +16,15 @@ const profileData = async (userID) => {
     }
 }
 
-const updateProfile = async (validatedData) => {
-    // validatedData.password = validatedData.password ?
+const updateProfile = async (validatedData, userID) => {
+    if (validatedData.password) validatedData.password = await argon2.hash(validatedData.password)
+
+    const updatedUser = await prisma.user.update({
+        where: { id: userID },
+        data: validatedData
+    })
+
+    return updatedUser
 }
 
 export default {
