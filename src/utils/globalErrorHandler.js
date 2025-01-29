@@ -2,11 +2,30 @@ import CustomError from "./customErrorHandler.js"
 
 const devError = (error, res) => {
     res.status(error.statusCode).json({
+        success: false,
         message: error.message,
         details: error.details ?? null,
         stackTrace: error.stack,
         error,
     })
+}
+
+const prodError = (error, res) => {
+
+    if (error.isOperational) {
+        res.status(error.statusCode).json({
+            success: false,
+            message: error.message,
+            details: error.details ?? null,
+
+        })
+    } else {
+        res.status(error.statusCode).json({
+            success: false,
+            message: "Something went wrong",
+        })
+    }
+
 }
 
 const duplicateErrorHandler = (error) => {
@@ -28,6 +47,10 @@ const globalErrorHandler = (error, req, res, next) => {
 
     if (process.env.ENVI === 'dev') {
         devError(error, res)
+    }
+
+    if (process.env.ENVI === 'prod') {
+        prodError(error, res)
     }
 }
 
