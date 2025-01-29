@@ -1,3 +1,5 @@
+import staticData from "../config/staticData.js";
+
 // Custom error class to handle application-specific errors with additional details
 class CustomError extends Error {
     constructor(message, statusCode, details = null) {
@@ -17,23 +19,8 @@ class CustomError extends Error {
     // Method to return the human-readable status based on the HTTP status code
     getStatus(statusCode) {
         // Map of common HTTP status codes to their human-readable status
-        const httpStatusCodes = {
-            200: "OK",
-            201: "Created",
-            204: "No Content",
-            400: "Bad Request",
-            401: "Unauthorized",
-            403: "Forbidden",
-            404: "Not Found",
-            405: "Method Not Allowed",
-            500: "Internal Server Error",
-            502: "Bad Gateway",
-            503: "Service Unavailable",
-            504: "Gateway Timeout"
-        }
-
         // Return the status text or 'unavailable' if the code is not in the map
-        return httpStatusCodes[statusCode] ?? 'unavailable';
+        return staticData.httpStatusCodes[statusCode] ?? 'unavailable'
     }
 }
 

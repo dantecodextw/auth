@@ -5,6 +5,7 @@ import CustomError from "./customErrorHandler.js"
 const devError = (error, res) => {
     res.status(error.statusCode).json({
         success: false, // Response indicates failure
+        status: error.status,
         message: error.message, // Send the error message
         details: error.details ?? null, // Include error details, if available
         stackTrace: error.stack, // Send the stack trace for debugging purposes (only in dev)
@@ -18,6 +19,7 @@ const prodError = (error, res) => {
     if (error.isOperational) {
         res.status(error.statusCode).json({
             success: false, // Response indicates failure
+            status: error.status,
             message: error.message, // Send the error message
             details: error.details ?? null, // Include error details if available
         })
@@ -25,6 +27,7 @@ const prodError = (error, res) => {
         // If the error is not operational (system-level error), send a generic error message
         res.status(error.statusCode).json({
             success: false, // Response indicates failure
+            status: error.status,
             message: "Something went wrong", // Provide a generic error message to avoid exposing internal details
         })
     }

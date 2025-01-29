@@ -24,10 +24,7 @@ const signup = async (validatedData) => {
     if (!newUser) throw new CustomError("Failed to create user", 400)
 
     // Return the newly created user object without the password for security reasons
-    return {
-        ...newUser,
-        password: undefined, // Remove sensitive data (password) before returning the user
-    }
+    return newUser
 }
 
 // Login function to authenticate users and return a JWT token
@@ -41,7 +38,8 @@ const login = async (validatedData) => {
                 { username: identifier },
                 { email: identifier }
             ]
-        }
+        },
+        omit: { password: false }
     })
 
     // If no user is found or the password is incorrect, throw an authentication error
@@ -55,7 +53,7 @@ const login = async (validatedData) => {
     // Return the user data along with the generated token, without the password for security
     return {
         ...user,
-        password: undefined, // Remove sensitive data (password)
+        password: undefined,
         accessToken: token // Include the generated JWT token
     }
 }

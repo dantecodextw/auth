@@ -17,7 +17,6 @@ const profileData = async (userID) => {
     return {
         ...user,
         deleted_at: undefined, // Remove the deleted_at field (for soft deletes)
-        password: undefined // Remove the password field for security
     }
 }
 
