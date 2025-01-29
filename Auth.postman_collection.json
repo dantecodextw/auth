@@ -1,0 +1,85 @@
+{
+	"info": {
+		"_postman_id": "53246b99-da5c-466e-821f-5ab0cd8e2eef",
+		"name": "Auth",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "41182395"
+	},
+	"item": [
+		{
+			"name": "Signup",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"first\": \"anshul\",\n    \"last\": \"rajput\",\n    \"email\": \"anshul@gmail.com\",\n    \"phone\": \"7049850868\",\n    \"username\": \"dantecodex\",\n    \"password\": \"password\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "localhost:2000/api/v1/auth/signup"
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"identifier\": \"dantecodex\",\n    \"password\": \"password1\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "localhost:2000/api/v1/auth/login"
+			},
+			"response": []
+		},
+		{
+			"name": "profile data",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwiaWF0IjoxNzM4MTI3MjQ1LCJleHAiOjE3MzgxMzA4NDV9.HIe6dlEW3TNh1Yd3kO3Uqo6tVAasExZIXWrILsFyo9o"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": "localhost:2000/api/v1/user/profile"
+			},
+			"response": []
+		},
+		{
+			"name": "update profile",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwiaWF0IjoxNzM4MTI3MjQ1LCJleHAiOjE3MzgxMzA4NDV9.HIe6dlEW3TNh1Yd3kO3Uqo6tVAasExZIXWrILsFyo9o"
+					}
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"first\": \"anshulsir\",\n    \"last\": \"rajputsir\",\n    \"email\": \"anshul@gmail.com\",\n    // \"phone\": \"7049850868\",\n    // \"username\": \"dantecodex\",\n    \"password\": \"password1\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "localhost:2000/api/v1/user/profile"
+			},
+			"response": []
+		}
+	]
+}

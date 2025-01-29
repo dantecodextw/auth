@@ -8,3 +8,7 @@ const updateProfile = joi.object({
     email: joi.string().email().empty(''),
     password: joi.string().min(6).empty('')
 })
+
+export default {
+    updateProfile
+}
