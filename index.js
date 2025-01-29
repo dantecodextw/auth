@@ -36,8 +36,7 @@ app.use(globalErrorHandler);
 
 // ================= SERVER INITIALIZATION =================
 // Start server on port 2000
-const PORT = 2000;
-app.listen(PORT, () => {
-    console.log(`Server has been started on port ${PORT}`);
+app.listen(process.env.PORT ?? 2001, () => {
+    console.log(`Server has been started on port ${process.env.PORT ?? 2001}`);
     // Note: In production, you might want to add a readiness check here
 });
