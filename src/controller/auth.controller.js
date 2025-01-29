@@ -20,7 +20,7 @@ const login = asyncErrorHandler(async (req, res) => {
 
     const user = await authService.login(value)
 
-    res.status(201).json(apiResponseHandler("Login successfull", user))
+    res.status(200).json(apiResponseHandler("Login successfull", user))
 })
 
 export default {

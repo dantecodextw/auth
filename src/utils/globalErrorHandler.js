@@ -10,13 +10,12 @@ const devError = (error, res) => {
 }
 
 const duplicateErrorHandler = (error) => {
-    const str = new RegExp(`${error.meta.modelName}_(.*?)_`)
-    const duplicateField = (error.meta.target).match(str)
-    error.message = 'Data already exist',
-        error.details = {
-            [duplicateField[1]]: `${duplicateField[1]} already exist`
-        }
-    return new CustomError(error.message, 400, error.details)
+    const duplicateField = error.meta.target[0];
+    error.message = 'Data already exists';
+    error.details = {
+        [duplicateField]: `${duplicateField} already exists`
+    };
+    return new CustomError(error.message, 400, error.details);
 }
 
 const globalErrorHandler = (error, req, res, next) => {

@@ -26,12 +26,32 @@
 		},
 		{
 			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"",
+							"if (pm.response.code === 200 && jsonData.data && jsonData.data.accessToken) {",
+							"    pm.globals.set(\"accessToken\", jsonData.data.accessToken);",
+							"    console.log(\"Access Token Saved:\", jsonData.data.accessToken);",
+							"} else {",
+							"    pm.globals.unset(\"accessToken\");",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"identifier\": \"dantecodex\",\n    \"password\": \"password1\"\n}",
+					"raw": "{\n    \"identifier\": \"dantecodex\",\n    \"password\": \"password\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -48,7 +68,7 @@
 				"auth": {
 					"type": "bearer",
 					"bearer": {
-						"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwiaWF0IjoxNzM4MTI3MjQ1LCJleHAiOjE3MzgxMzA4NDV9.HIe6dlEW3TNh1Yd3kO3Uqo6tVAasExZIXWrILsFyo9o"
+						"token": "{{accessToken}}"
 					}
 				},
 				"method": "GET",
@@ -63,7 +83,7 @@
 				"auth": {
 					"type": "bearer",
 					"bearer": {
-						"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwiaWF0IjoxNzM4MTI3MjQ1LCJleHAiOjE3MzgxMzA4NDV9.HIe6dlEW3TNh1Yd3kO3Uqo6tVAasExZIXWrILsFyo9o"
+						"token": "{{accessToken}}"
 					}
 				},
 				"method": "PUT",
