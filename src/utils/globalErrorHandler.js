@@ -21,7 +21,7 @@ const prodError = (error, res) => {
             success: false, // Response indicates failure
             status: error.status,
             message: error.message, // Send the error message
-            details: error.details ?? null, // Include error details if available
+            details: error.details ?? undefined, // Include error details if available
         })
     } else {
         // If the error is not operational (system-level error), send a generic error message
@@ -64,11 +64,11 @@ const globalErrorHandler = (error, req, res, next) => {
     }
 
     // Depending on the environment (dev or prod), call the appropriate error handler
-    if (process.env.ENVI === 'dev') {
+    if (process.env.NODE_ENV === 'dev') {
         devError(error, res); // Call development error handler (detailed error)
     }
 
-    if (process.env.ENVI === 'prod') {
+    if (process.env.NODE_ENV === 'prod') {
         prodError(error, res); // Call production error handler (simplified error)
     }
 }

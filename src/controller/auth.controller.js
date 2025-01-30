@@ -9,19 +9,11 @@ import userValidation from "../validation/auth.validation.js"; // Joi validation
 // Signup controller wrapped in error handling middleware
 const signup = asyncErrorHandler(async (req, res) => {
     // ===== VALIDATION PHASE =====
-    // Validate request body against Joi schema
-    const { error, value } = userValidation.signup.validate(req.body);
-
-    // Throw custom error if validation fails
-    if (error) throw new CustomError(
-        error.details[0].message, // Human-readable error
-        400, // HTTP status code
-        error.details // Original validation details for debugging
-    );
+    const validatedData = userValidation.signup.validate(req.body)
 
     // ===== SERVICE CALL =====
     // Pass validated data to service layer for business logic
-    const newUser = await authService.signup(value);
+    const newUser = await authService.signup(validatedData);
 
     // ===== RESPONSE =====
     // Send standardized success response with 201 Created status
@@ -31,11 +23,15 @@ const signup = asyncErrorHandler(async (req, res) => {
 // Login controller with similar structure
 const login = asyncErrorHandler(async (req, res) => {
     // Validate login credentials format
-    const { error, value } = userValidation.login.validate(req.body);
-    if (error) throw new CustomError(error.details[0].message, 400, error.details);
+
+    // Will explain how not having validation helper class would result into writing customerror for each api
+    // const { error, value } = userValidation.login.validate(req.body);
+    // if (error) throw new CustomError(error.details[0].message, 400, error.details);
+
+    const validatedData = userValidation.login.validate(req.body)
 
     // Authenticate user through service layer
-    const user = await authService.login(value);
+    const user = await authService.login(validatedData);
 
     // Return success response with auth tokens/user data
     res.status(200).json(apiResponseHandler("Login successful", user));
