@@ -6,7 +6,7 @@ import cors from "cors";
 import apiRouter from "./src/api/mainRouter.js"; // Centralized route configuration
 import globalErrorHandler from "./src/utils/globalErrorHandler.js"; // Unified error response formatter
 
-// Initialize Express application
+// Initialize Express applications
 const app = express();
 
 // ================= MIDDLEWARE SETUP =================
