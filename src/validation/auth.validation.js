@@ -1,8 +1,9 @@
 // Import Joi for schema validation (used to validate data formats)
 import joi from 'joi';
+import ValidationHelper from '../utils/validationHelper.js';
 
 // ================= SIGNUP VALIDATION SCHEMA =================
-const signup = joi.object({
+const signup = new ValidationHelper({
     // First name: Must be a string with a minimum length of 3 characters, and it is required
     first: joi.string().min(3).required(),
 
@@ -23,13 +24,13 @@ const signup = joi.object({
 });
 
 // ================= LOGIN VALIDATION SCHEMA =================
-const login = joi.object({
+const login = new ValidationHelper({
     // Identifier: Can be either a username or email, must be a string with a minimum length of 3 characters, and is required
     identifier: joi.string().min(3).required(),
 
     // Password: Must be a string with a minimum length of 6 characters, and it is required
     password: joi.string().min(6).required()
-});
+})
 
 // Export the validation schemas so they can be used in other parts of the application
 export default {

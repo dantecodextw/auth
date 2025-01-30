@@ -1,8 +1,9 @@
 // Import the Joi library for schema validation
 import joi from "joi";
+import ValidationHelper from "../utils/validationHelper.js";
 
 // Schema for validating profile update data
-const updateProfile = joi.object({
+const updateProfile = new ValidationHelper({
     // First name: must be a string, at least 3 characters long, and can be empty (i.e., optional)
     first: joi.string().min(3).empty(''), // `min(3)` ensures at least 3 characters, `empty('')` allows the field to be optional (empty string is valid)
 
@@ -20,7 +21,7 @@ const updateProfile = joi.object({
 
     // Password: must be a string, at least 6 characters long, and can be empty (i.e., optional)
     password: joi.string().min(6).empty('') // Allows the password field to be empty when updating other fields
-});
+})
 
 // Export the schema for use in other parts of the application
 export default {
