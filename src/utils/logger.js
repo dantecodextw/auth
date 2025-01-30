@@ -1,4 +1,4 @@
-import winston from "winston";
+import winston from 'winston';
 
 const logger = winston.createLogger({
     level: process.env.LOG_LEVEL || 'info',
@@ -8,7 +8,10 @@ const logger = winston.createLogger({
     ),
     transports: [
         new winston.transports.Console(),
-        new winston.transports.File({ filename: 'logs/combined.log' })
+        new winston.transports.File({
+            filename: 'logs/combined.log',
+            maxsize: 5 * 1024 * 1024 // 5MB
+        })
     ]
 });
 

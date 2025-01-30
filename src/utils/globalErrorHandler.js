@@ -1,77 +1,156 @@
-// Import CustomError class for handling application-specific errors
-import CustomError from "./customErrorHandler.js"
+// globalErrorHandler.js
+import CustomError from "./customErrorHandler.js";
+import logger from "./logger.js";
+import { Prisma } from '@prisma/client';
 
-// Error handler for development environment (detailed error information is sent to the client)
-const devError = (error, res) => {
-    res.status(error.statusCode).json({
-        success: false, // Response indicates failure
-        status: error.status,
-        message: error.message, // Send the error message
-        details: error.details ?? null, // Include error details, if available
-        stackTrace: error.stack, // Send the stack trace for debugging purposes (only in dev)
-        error, // Include the entire error object for detailed inspection
-    })
-}
+// Map Prisma error codes to HTTP status codes
+const PRISMA_ERROR_MAP = {
+    P2002: 409, // Unique constraint violation
+    P2003: 409, // Foreign key constraint
+    P2025: 404, // Record not found
+    P2016: 400, // Invalid data format
+    P2021: 503, // Database table not found
+    P2022: 503, // Database column not found
+    P1017: 503, // Database connection closed
+};
 
-// Error handler for production environment (simplified error information is sent to the client)
-const prodError = (error, res) => {
-    // If the error is operational (planned application error), provide the message and details
-    if (error.isOperational) {
-        res.status(error.statusCode).json({
-            success: false, // Response indicates failure
-            status: error.status,
-            message: error.message, // Send the error message
-            details: error.details ?? undefined, // Include error details if available
-        })
-    } else {
-        // If the error is not operational (system-level error), send a generic error message
-        res.status(error.statusCode).json({
-            success: false, // Response indicates failure
-            status: error.status,
-            message: "Something went wrong", // Provide a generic error message to avoid exposing internal details
-        })
+const NODE_ENV = process.env.NODE_ENV || 'production';
+
+const parseValidationError = (message) => {
+    const fieldMatch = message.match(/Unknown argument `(\w+)`/);
+    const valueMatch = message.match(/Got invalid value '(.+?)'/);
+    const typeMatch = message.match(/Expected (\w+), provided/);
+
+    const details = {};
+    if (fieldMatch) details.field = fieldMatch[1];
+    if (valueMatch) details.invalidValue = valueMatch[1];
+    if (typeMatch) details.expectedType = typeMatch[1];
+
+    return Object.keys(details).length ? details : null;
+};
+
+const handlePrismaError = (error) => {
+    // Handle known request errors
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        const statusCode = PRISMA_ERROR_MAP[error.code] || 500;
+        const errorMeta = error.meta || {};
+
+        const messageMap = {
+            P2002: `Conflict: ${errorMeta.target?.join(', ') || 'Field'} already exists`,
+            P2025: errorMeta.modelName
+                ? `${errorMeta.modelName} not found`
+                : 'Resource not found',
+            P2016: 'Missing required field',
+        };
+
+        return new CustomError(
+            messageMap[error.code] || 'Database request error',
+            statusCode,
+            {
+                prismaCode: error.code,
+                ...(NODE_ENV === 'development' && { meta: error.meta })
+            }
+        );
     }
-}
 
-// Handler for duplicate entry errors (typically for unique constraint violations in the database)
-const duplicateErrorHandler = (error) => {
-    // Get the field that caused the duplicate error (e.g., unique username or email)
-    const duplicateField = error.meta.target[0];
+    // Handle validation errors
+    if (error instanceof Prisma.PrismaClientValidationError) {
+        const details = parseValidationError(error.message);
+        return new CustomError(
+            'Invalid request structure',
+            400,
+            { validation: details }
+        );
+    }
 
-    // Modify the error message to indicate a duplicate entry
-    error.message = 'Data already exists';
+    // Handle initialization errors
+    if (error instanceof Prisma.PrismaClientInitializationError) {
+        logger.error('Prisma startup failed:', error);
+        return new CustomError(
+            'Database connection error',
+            503,
+            { code: 'DB_CONNECTION_FAILURE' }
+        );
+    }
 
-    // Attach a more specific error detail for the duplicate field
-    error.details = {
-        [duplicateField]: `${duplicateField} already exists` // Indicate which field was duplicated
+    // Handle runtime engine crashes
+    if (error instanceof Prisma.PrismaClientRustPanicError) {
+        logger.fatal('Prisma engine crashed:', error);
+        return new CustomError(
+            'Database system error',
+            500,
+            { code: 'DB_ENGINE_FAILURE' }
+        );
+    }
+
+    return error;
+};
+
+const globalErrorHandler = (error, req, res, next) => {
+    // Standardize error properties
+    error.statusCode = error.statusCode || 500;
+    error.status = error.status || 'error';
+
+    // Add request context
+    error.request = {
+        method: req.method,
+        path: req.path,
+        timestamp: new Date().toISOString()
     };
 
-    // Return a new CustomError object with the updated message and details
-    return new CustomError(error.message, 400, error.details);
-}
-
-// Global error handler to catch all errors in the application (for both dev and prod environments)
-const globalErrorHandler = (error, req, res, next) => {
-    // Ensure the error has a message, defaulting to a generic message if not provided
-    error.message = error.message ?? "Something went wrong";
-
-    // Ensure the error has a status code, defaulting to 500 (Internal Server Error) if not provided
-    error.statusCode = error.statusCode ?? 500;
-
-    // If the error is related to a unique constraint violation (e.g., duplicate entry), handle it specifically
-    if (error.code === 'P2002') {
-        error = duplicateErrorHandler(error); // Handle duplicate errors with a custom message
+    // Handle Prisma errors
+    if (error instanceof Prisma.PrismaClientKnownRequestError ||
+        error instanceof Prisma.PrismaClientValidationError ||
+        error instanceof Prisma.PrismaClientInitializationError ||
+        error instanceof Prisma.PrismaClientRustPanicError) {
+        error = handlePrismaError(error);
     }
 
-    // Depending on the environment (dev or prod), call the appropriate error handler
-    if (process.env.NODE_ENV === 'development') {
-        devError(error, res); // Call development error handler (detailed error)
+    // Structured logging
+    logger.error({
+        message: error.message,
+        code: error.code || 'INTERNAL_ERROR',
+        statusCode: error.statusCode,
+        path: req.path,
+        userId: req.user?.id,
+        prismaCode: error.prismaCode,
+        details: error.details,
+        ...(NODE_ENV === 'development' && { stack: error.stack })
+    });
+
+    // Construct response
+    const response = {
+        success: false,
+        status: error.status,
+        message: error.message,
+        ...(error.details && { details: error.details }),
+        ...(NODE_ENV === 'development' && {
+            stack: error.stack,
+            prismaCode: error.prismaCode
+        })
+    };
+
+    // Production security cleanup
+    if (NODE_ENV === 'production') {
+        if (!error.isOperational) {
+            response.message = 'An unexpected error occurred';
+            delete response.details;
+        }
+        delete response.prismaCode;
     }
 
-    if (process.env.NODE_ENV === 'production') {
-        prodError(error, res); // Call production error handler (simplified error)
-    }
-}
+    res.status(error.statusCode).json(response);
+};
 
-// Export the global error handler to be used in the application
+// Handle uncaught exceptions/rejections
+process.on('uncaughtException', (error) => {
+    logger.fatal('Uncaught Exception:', error);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason) => {
+    logger.fatal('Unhandled Rejection:', reason);
+    process.exit(1);
+});
+
 export default globalErrorHandler;

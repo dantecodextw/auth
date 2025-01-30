@@ -10,6 +10,7 @@ import httpErrors from "http-errors"; // Standard HTTP error objects
 // Project Modules
 import apiRouter from "./src/api/mainRouter.js";
 import globalErrorHandler from "./src/utils/globalErrorHandler.js";
+import requestId from "./src/middleware/requestId.js";
 
 // Configuration Validation
 const requiredEnvVars = ['NODE_ENV', 'CORS_ORIGINS'];
@@ -43,6 +44,9 @@ const apiLimiter = rateLimit({
     message: 'Too many requests from this IP, please try again later'
 });
 
+app.use(apiLimiter)
+app.use(requestId)
+
 // ================= PERFORMANCE MIDDLEWARE =================
 app.use(compression());
 
@@ -64,6 +68,7 @@ app.use(cors(corsOptions));
 // ================= LOGGING MIDDLEWARE =================
 app.use((req, res, next) => {
     logger.info(`${req.method} ${req.originalUrl}`, {
+        requestId: req.requestId,
         ip: req.ip,
         userAgent: req.get('User-Agent')
     });
@@ -71,7 +76,7 @@ app.use((req, res, next) => {
 });
 
 // ================= ROUTES =================
-app.use('/api/v1', apiLimiter, apiRouter); // Apply rate limiting to API
+app.use('/api/v1', apiRouter); // Apply rate limiting to API
 
 // ================= HEALTH CHECK =================
 app.get('/health', (req, res) => {
