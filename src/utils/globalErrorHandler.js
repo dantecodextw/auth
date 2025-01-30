@@ -64,11 +64,11 @@ const globalErrorHandler = (error, req, res, next) => {
     }
 
     // Depending on the environment (dev or prod), call the appropriate error handler
-    if (process.env.NODE_ENV === 'dev') {
+    if (process.env.NODE_ENV === 'development') {
         devError(error, res); // Call development error handler (detailed error)
     }
 
-    if (process.env.NODE_ENV === 'prod') {
+    if (process.env.NODE_ENV === 'production') {
         prodError(error, res); // Call production error handler (simplified error)
     }
 }
