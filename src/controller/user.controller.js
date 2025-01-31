@@ -1,8 +1,6 @@
 import userService from "../service/user.service.js";
 import apiResponseHandler from "../utils/apiResponseHandler.js";
 import asyncErrorHandler from "../utils/asyncErrorHandler.js";
-import CustomError from "../utils/customErrorHandler.js";
-import authValidation from "../validation/auth.validation.js";
 import userValidation from "../validation/user.validation.js";
 
 const profile = asyncErrorHandler(async (req, res) => {

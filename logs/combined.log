@@ -285,3 +285,4 @@
 {"level":"info","message":"User logged in: anshul2@gmail.com","timestamp":"2025-01-31T07:14:08.132Z"}
 {"ip":"::1","level":"info","message":"PUT /api/v1/user/profile","requestId":"df37fd0b-7a4b-49b8-a1ac-aa17b74f1771","timestamp":"2025-01-31T07:14:13.210Z","userAgent":"PostmanRuntime/7.43.0"}
 {"level":"error","message":"Prisma Error: Error in PostgreSQL connection: Error { kind: Closed, cause: None }","target":"quaint::connector::postgres::native","timestamp":"2025-01-31T07:20:51.675Z"}
+{"level":"info","message":"SIGTERM received: Closing HTTP server","timestamp":"2025-01-31T09:09:53.040Z"}

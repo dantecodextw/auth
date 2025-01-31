@@ -7,14 +7,15 @@ import userController from "../controller/user.controller.js"; // User profile o
 
 // Import middleware
 import checkAuth from "../middleware/checkAuth.js"; // Authentication verification middleware
+import rateLimiter from "../utils/rateLimiter.js";
 
 // Create main router instance
 const apiRouter = express.Router();
 
 // ================= PUBLIC ROUTES (No authentication required) =================
 // Authentication endpoints
-apiRouter.route('/auth/signup').post(authController.signup); // User registration
-apiRouter.route('/auth/login').post(authController.login); // User login
+apiRouter.route('/auth/signup').post(rateLimiter(10, '15min'), authController.signup); // User registration
+apiRouter.route('/auth/login').post(rateLimiter(10, '10min'), authController.login); // User login
 
 // ================= AUTHENTICATION MIDDLEWARE =================
 // All routes below this line require valid authentication token

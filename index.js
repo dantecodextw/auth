@@ -11,6 +11,7 @@ import httpErrors from "http-errors"; // Standard HTTP error objects
 import apiRouter from "./src/api/mainRouter.js";
 import globalErrorHandler from "./src/utils/globalErrorHandler.js";
 import requestId from "./src/middleware/requestId.js";
+import rateLimiter from "./src/utils/rateLimiter.js";
 
 // Configuration Validation
 const requiredEnvVars = ['NODE_ENV', 'CORS_ORIGINS'];
@@ -38,13 +39,8 @@ app.use(helmet({
 }));
 
 // Rate Limiting (adjust values based on requirements)
-const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: process.env.NODE_ENV === 'production' ? 100 : 1000,
-    message: 'Too many requests from this IP, please try again later'
-});
+app.use(rateLimiter(1000, '1h'))
 
-app.use(apiLimiter)
 app.use(requestId)
 
 // ================= PERFORMANCE MIDDLEWARE =================
