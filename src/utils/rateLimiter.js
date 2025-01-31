@@ -22,7 +22,7 @@ const evaluateTime = (time) => {
 const rateLimiter = (count, time = '15min') => {
     return rateLimit({
         windowMs: evaluateTime(time),
-        max: process.env.NODE_ENV === "production" ? count : 5000,
+        max: process.env.NODE_ENV === "production" ? count : count || 5000,
         message: "Too many requests from this IP, please try again later",
     });
 };

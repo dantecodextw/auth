@@ -286,3 +286,75 @@
 {"ip":"::1","level":"info","message":"PUT /api/v1/user/profile","requestId":"df37fd0b-7a4b-49b8-a1ac-aa17b74f1771","timestamp":"2025-01-31T07:14:13.210Z","userAgent":"PostmanRuntime/7.43.0"}
 {"level":"error","message":"Prisma Error: Error in PostgreSQL connection: Error { kind: Closed, cause: None }","target":"quaint::connector::postgres::native","timestamp":"2025-01-31T07:20:51.675Z"}
 {"level":"info","message":"SIGTERM received: Closing HTTP server","timestamp":"2025-01-31T09:09:53.040Z"}
+{"level":"info","message":"Server operational in development mode on port 2000","timestamp":"2025-01-31T10:44:55.155Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"ba97dd03-2f89-47fd-ae0a-7be383e7745b","timestamp":"2025-01-31T10:44:59.804Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"warn","message":"Failed login attempt for: dantecodex","timestamp":"2025-01-31T10:45:01.132Z"}
+{"code":"INTERNAL_ERROR","details":null,"level":"error","message":"Invalid credentials","path":"/api/v1/auth/login","stack":"Error: Invalid credentials\n    at Object.login (file:///home/tw/auth/src/service/auth.service.js:69:15)\n    at async file:///home/tw/auth/src/controller/auth.controller.js:34:18","statusCode":401,"timestamp":"2025-01-31T10:45:01.133Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"07c637d7-b3d6-45d5-812f-fd30db9b3747","timestamp":"2025-01-31T10:45:04.924Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"warn","message":"Failed login attempt for: dantecodex","timestamp":"2025-01-31T10:45:05.063Z"}
+{"code":"INTERNAL_ERROR","details":null,"level":"error","message":"Invalid credentials","path":"/api/v1/auth/login","stack":"Error: Invalid credentials\n    at Object.login (file:///home/tw/auth/src/service/auth.service.js:69:15)\n    at async file:///home/tw/auth/src/controller/auth.controller.js:34:18","statusCode":401,"timestamp":"2025-01-31T10:45:05.065Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/signup","requestId":"ebcdda23-6db9-47a9-a705-1db3ccf1278d","timestamp":"2025-01-31T10:45:10.359Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"error","message":"Prisma Error: \nInvalid `prisma.user.create()` invocation:\n\n\nUnique constraint failed on the fields: (`phone`)","target":"user.create","timestamp":"2025-01-31T10:45:10.564Z"}
+{"code":"INTERNAL_ERROR","details":{"meta":{"modelName":"User","target":["phone"]},"prismaCode":"P2002"},"level":"error","message":"Conflict: phone already exists","path":"/api/v1/auth/signup","stack":"Error: Conflict: phone already exists\n    at handlePrismaError (file:///home/tw/auth/src/utils/globalErrorHandler.js:46:16)\n    at globalErrorHandler (file:///home/tw/auth/src/utils/globalErrorHandler.js:106:17)\n    at Layer.handle_error (/home/tw/auth/node_modules/express/lib/router/layer.js:71:5)\n    at trim_prefix (/home/tw/auth/node_modules/express/lib/router/index.js:326:13)\n    at /home/tw/auth/node_modules/express/lib/router/index.js:286:9\n    at Function.process_params (/home/tw/auth/node_modules/express/lib/router/index.js:346:12)\n    at next (/home/tw/auth/node_modules/express/lib/router/index.js:280:10)\n    at Layer.handle_error (/home/tw/auth/node_modules/express/lib/router/layer.js:67:12)\n    at trim_prefix (/home/tw/auth/node_modules/express/lib/router/index.js:326:13)\n    at /home/tw/auth/node_modules/express/lib/router/index.js:286:9","statusCode":409,"timestamp":"2025-01-31T10:45:10.568Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"468e8608-1ff2-4eb8-9ce3-40a7b94fca7c","timestamp":"2025-01-31T10:45:22.842Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"User logged in: anshul2@gmail.com","timestamp":"2025-01-31T10:45:23.186Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"cbc51c0b-5d8a-477b-8d4f-5f4d15ef3725","timestamp":"2025-01-31T10:45:24.522Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"User logged in: anshul2@gmail.com","timestamp":"2025-01-31T10:45:24.718Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"b2b023f0-61cf-4271-b30d-dde89b72f32b","timestamp":"2025-01-31T10:45:25.574Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"User logged in: anshul2@gmail.com","timestamp":"2025-01-31T10:45:25.764Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"409b7178-f0d6-414d-be29-4ae82c455497","timestamp":"2025-01-31T10:45:26.579Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"User logged in: anshul2@gmail.com","timestamp":"2025-01-31T10:45:26.768Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"40ebb746-820e-4130-877c-c633c6d8f920","timestamp":"2025-01-31T10:45:36.862Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"User logged in: anshul2@gmail.com","timestamp":"2025-01-31T10:45:37.038Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"1a6c2b2c-c33d-40de-8015-c7650b9a7774","timestamp":"2025-01-31T10:45:37.958Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"User logged in: anshul2@gmail.com","timestamp":"2025-01-31T10:45:38.209Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"b04ab999-c560-4e96-bb5f-30a89ef41cd2","timestamp":"2025-01-31T10:45:39.238Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"User logged in: anshul2@gmail.com","timestamp":"2025-01-31T10:45:39.413Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"54ca8aba-549d-4db1-a0b0-7096662229d4","timestamp":"2025-01-31T10:45:41.832Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"User logged in: anshul2@gmail.com","timestamp":"2025-01-31T10:45:42.019Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"94f320d0-4c47-4b53-9d9f-66f8080d5b9d","timestamp":"2025-01-31T10:45:43.322Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"User logged in: anshul2@gmail.com","timestamp":"2025-01-31T10:45:43.514Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"f7f8138d-a83e-4e18-bb99-c83ad336f607","timestamp":"2025-01-31T10:45:46.960Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"User logged in: anshul2@gmail.com","timestamp":"2025-01-31T10:45:47.153Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"30c66974-4379-4409-80df-1c32dc26b12b","timestamp":"2025-01-31T10:45:48.023Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"User logged in: anshul2@gmail.com","timestamp":"2025-01-31T10:45:48.200Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"3dd45b36-a0f5-49bf-a184-d528d91cc3cf","timestamp":"2025-01-31T10:45:48.903Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"User logged in: anshul2@gmail.com","timestamp":"2025-01-31T10:45:49.074Z"}
+{"level":"info","message":"Server operational in development mode on port 2000","timestamp":"2025-01-31T10:45:54.852Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"c16a2d7d-34db-4d35-bad9-263757e04be9","timestamp":"2025-01-31T10:45:56.798Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"User logged in: anshul2@gmail.com","timestamp":"2025-01-31T10:45:57.637Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"7f240535-869d-461a-8053-20b35bc07317","timestamp":"2025-01-31T10:45:58.656Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"User logged in: anshul2@gmail.com","timestamp":"2025-01-31T10:45:58.875Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"65d116e9-b2c9-41f8-b178-de8b0633b4b5","timestamp":"2025-01-31T10:45:59.819Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"User logged in: anshul2@gmail.com","timestamp":"2025-01-31T10:46:00.035Z"}
+{"level":"info","message":"Server operational in development mode on port 2000","timestamp":"2025-01-31T10:50:54.939Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"7f0bee7f-e302-4431-94e6-7d7fe668fecd","timestamp":"2025-01-31T10:51:01.127Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"User logged in: anshul2@gmail.com","timestamp":"2025-01-31T10:51:02.073Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"62046170-38d3-458f-9cf9-93fbf7f908d1","timestamp":"2025-01-31T10:51:03.080Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"Server operational in development mode on port 2000","timestamp":"2025-01-31T10:51:23.449Z"}
+{"level":"info","message":"Server operational in development mode on port 2000","timestamp":"2025-01-31T10:52:00.429Z"}
+{"level":"info","message":"Server operational in development mode on port 2000","timestamp":"2025-01-31T10:52:06.928Z"}
+{"level":"info","message":"Server operational in development mode on port 2000","timestamp":"2025-01-31T10:52:08.444Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"acd5777d-d177-4260-a321-72b667eb75b8","timestamp":"2025-01-31T10:52:10.595Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"User logged in: anshul2@gmail.com","timestamp":"2025-01-31T10:52:11.497Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"c4ad2704-061b-4c4d-9452-a5d93b862eae","timestamp":"2025-01-31T10:52:12.407Z","userAgent":"PostmanRuntime/7.43.0"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"bdafc197-9816-4ea2-a22b-b8cc70b32a53","timestamp":"2025-01-31T10:52:13.706Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"Server operational in development mode on port 2000","timestamp":"2025-01-31T10:58:18.964Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"25385be8-b29e-4915-a77a-c24263ff8fca","timestamp":"2025-01-31T10:58:21.273Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"User logged in: anshul2@gmail.com","timestamp":"2025-01-31T10:58:22.916Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"2ab396ef-e98d-4058-956d-77c23ea8afca","timestamp":"2025-01-31T10:58:24.057Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"Server operational in development mode on port 2000","timestamp":"2025-01-31T10:58:55.631Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"b0578ec7-c121-4956-b345-a98cf44f5209","timestamp":"2025-01-31T10:58:58.452Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"User logged in: anshul2@gmail.com","timestamp":"2025-01-31T10:58:59.247Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"b84c1168-d5cb-4892-ae85-68e3e40bf53a","timestamp":"2025-01-31T10:59:00.288Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"Server operational in development mode on port 2000","timestamp":"2025-01-31T10:59:31.760Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"c790a0c4-3714-4f6b-ae55-d2e62aabb6b8","timestamp":"2025-01-31T10:59:33.532Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"User logged in: anshul2@gmail.com","timestamp":"2025-01-31T10:59:34.464Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"9b16f739-d681-4318-9220-c38ef2da1985","timestamp":"2025-01-31T10:59:35.310Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"Server operational in development mode on port 2000","timestamp":"2025-01-31T10:59:51.981Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"5611edf8-4a90-49c9-a5b1-d9c90d983000","timestamp":"2025-01-31T10:59:54.419Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"User logged in: anshul2@gmail.com","timestamp":"2025-01-31T10:59:55.268Z"}
+{"ip":"::1","level":"info","message":"POST /api/v1/auth/login","requestId":"d254fffe-8826-418b-94b0-65f844e4e35c","timestamp":"2025-01-31T10:59:56.173Z","userAgent":"PostmanRuntime/7.43.0"}
+{"level":"info","message":"Server operational in development mode on port 2000","timestamp":"2025-01-31T11:00:04.884Z"}
+{"level":"info","message":"Server operational in development mode on port 2000","timestamp":"2025-01-31T11:00:09.531Z"}
+{"level":"info","message":"Server operational in development mode on port 2000","timestamp":"2025-01-31T11:00:19.855Z"}

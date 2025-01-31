@@ -15,7 +15,7 @@ const apiRouter = express.Router();
 // ================= PUBLIC ROUTES (No authentication required) =================
 // Authentication endpoints
 apiRouter.route('/auth/signup').post(rateLimiter(10, '15min'), authController.signup); // User registration
-apiRouter.route('/auth/login').post(rateLimiter(10, '10min'), authController.login); // User login
+apiRouter.route('/auth/login').post(rateLimiter(5, '10min'), authController.login); // User login
 
 // ================= AUTHENTICATION MIDDLEWARE =================
 // All routes below this line require valid authentication token
