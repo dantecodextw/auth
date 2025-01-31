@@ -7,7 +7,7 @@ const logger = winston.createLogger({
         winston.format.json()
     ),
     transports: [
-        new winston.transports.Console(),
+        // new winston.transports.Console(),
         new winston.transports.File({
             filename: 'logs/combined.log',
             maxsize: 5 * 1024 * 1024 // 5MB

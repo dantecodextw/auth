@@ -1,65 +1,90 @@
-// Import necessary modules
-import * as argon2 from "argon2" // Import argon2 for hashing and verifying passwords
-import prisma from "../../prisma/client/prismaClient.js" // Import Prisma client to interact with the database
-import CustomError from "../utils/customErrorHandler.js" // Custom error handler for application-specific errors
-import jwt from "jsonwebtoken" // Import jsonwebtoken to generate authentication tokens
+import * as argon2 from "argon2";
+import prisma from "../../prisma/client/prismaClient.js";
+import CustomError from "../utils/customErrorHandler.js";
+import jwt from "jsonwebtoken";
+import logger from "../utils/logger.js";
+import asyncErrorHandler from "../utils/asyncErrorHandler.js";
 
-// Function to generate a JWT token for a user
-const generateToken = (userID) => {
-    // Sign and return a JWT token with user ID as the payload, using a secret from environment variables
-    return jwt.sign({ id: userID }, process.env.JWT_SECRET, { expiresIn: "1h" })
-}
+// Security configurations
+const JWT_CONFIG = {
+    algorithm: 'HS256',
+    expiresIn: process.env.JWT_EXPIRES_IN || '1h',
+    issuer: process.env.JWT_ISSUER || 'our-app-name'
+};
 
-// Signup function to handle user registration
+
+//These settings configure the Argon2id algorithm to use 19MB of memory, 
+// perform 2 iterations, run on a single thread, and generate a 32-byte hash. 
+// These values balance security and performance for password hashing.
+const ARGON_CONFIG = {
+    type: argon2.argon2id,
+    memoryCost: 19456,
+    timeCost: 2,
+    parallelism: 1,
+    hashLength: 32
+};
+
+const generateToken = (userId) => {
+    return jwt.sign(
+        { id: userId },
+        process.env.JWT_SECRET,
+        JWT_CONFIG
+    );
+};
+
 const signup = async (validatedData) => {
-    // Hash the password before saving the user to the database (security measure)
-    validatedData.password = await argon2.hash(validatedData.password)
+    const hashedPassword = await argon2.hash(validatedData.password, ARGON_CONFIG);
 
-    // Create a new user in the database using the validated data
     const newUser = await prisma.user.create({
-        data: validatedData
+        data: {
+            ...validatedData,
+            password: hashedPassword,
+            password_changed_at: new Date()
+        },
+        select: { id: true, email: true, username: true, created_at: true }
     })
 
-    // If user creation fails, throw a custom error
-    if (!newUser) throw new CustomError("Failed to create user", 400)
+    logger.info(`User created: ${newUser.email}`);
+    return {
+        ...newUser,
+        accessToken: generateToken(newUser.id)
+    };
+};
 
-    // Return the newly created user object without the password for security reasons
-    return newUser
-}
-
-// Login function to authenticate users and return a JWT token
 const login = async (validatedData) => {
-    const { identifier, password } = validatedData // Destructure the validated login data
+    const { identifier, password } = validatedData;
 
-    // Find a user based on the identifier (either username or email)
     const user = await prisma.user.findFirst({
         where: {
-            OR: [ // Search by either username or email
-                { username: identifier },
-                { email: identifier }
+            OR: [
+                { email: { equals: identifier, mode: 'insensitive' } },
+                { username: { equals: identifier, mode: 'insensitive' } }
             ]
         },
         omit: { password: false }
+    });
+
+    if (!user || !(await argon2.verify(user.password, password))) {
+        logger.warn(`Failed login attempt for: ${identifier}`);
+        throw new CustomError("Invalid credentials", 401);
+    }
+
+    if (!user.is_active) {
+        logger.warn(`Login attempt for deactivated account: ${user.id}`);
+        throw new CustomError("Account deactivated", 403);
+    }
+
+    await prisma.user.update({
+        where: { id: user.id },
+        data: { last_login: new Date() }
     })
 
-    // If no user is found or the password is incorrect, throw an authentication error
-    if (!user || !(await argon2.verify(user.password, password))) {
-        throw new CustomError("Invalid login credentials", 401)
-    }
-
-    // Generate an authentication token for the user
-    const token = generateToken(user.id)
-
-    // Return the user data along with the generated token, without the password for security
+    logger.info(`User logged in: ${user.email}`);
     return {
-        ...user,
-        password: undefined,
-        accessToken: token // Include the generated JWT token
-    }
-}
+        user,
+        accessToken: generateToken(user.id),
+        password: undefined
+    };
+};
 
-// Export the signup and login methods so they can be used in other parts of the app
-export default {
-    signup,
-    login
-}
+export default { signup, login };

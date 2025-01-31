@@ -11,10 +11,9 @@ const profile = asyncErrorHandler(async (req, res) => {
 })
 
 const updateProfile = asyncErrorHandler(async (req, res) => {
-    const { error, value } = userValidation.updateProfile.validate(req.body)
-    if (error) throw new CustomError(error.details[0].message, 400, error.details)
+    const validatedData = userValidation.updateProfile.validate(req.body)
 
-    const updatedUser = await userService.updateProfile(value, req.user.id)
+    const updatedUser = await userService.updateProfile(validatedData, req.user.id)
 
     res.status(200).json(apiResponseHandler('User has been updated successfully', updatedUser))
 })

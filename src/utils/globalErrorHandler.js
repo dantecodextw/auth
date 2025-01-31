@@ -18,12 +18,12 @@ const NODE_ENV = process.env.NODE_ENV || 'production';
 
 const parseValidationError = (message) => {
     const fieldMatch = message.match(/Unknown argument `(\w+)`/);
-    const valueMatch = message.match(/Got invalid value '(.+?)'/);
-    const typeMatch = message.match(/Expected (\w+), provided/);
+    const valueMatch = message.match(/Got invalid value (.+?) for/);
+    const typeMatch = message.match(/Expected (.+?), provided/);
 
     const details = {};
     if (fieldMatch) details.field = fieldMatch[1];
-    if (valueMatch) details.invalidValue = valueMatch[1];
+    if (valueMatch) details.invalidValue = valueMatch[1].replace(/'/g, '');
     if (typeMatch) details.expectedType = typeMatch[1];
 
     return Object.keys(details).length ? details : null;
@@ -59,7 +59,7 @@ const handlePrismaError = (error) => {
         return new CustomError(
             'Invalid request structure',
             400,
-            { validation: details }
+            { validation: details || error.message }
         );
     }
 

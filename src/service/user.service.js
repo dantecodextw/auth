@@ -3,6 +3,18 @@ import * as argon2 from "argon2" // Import argon2 for hashing passwords
 import prisma from "../../prisma/client/prismaClient.js" // Prisma client to interact with the database
 import CustomError from "../utils/customErrorHandler.js" // Custom error class for handling application-specific errors
 
+
+//These settings configure the Argon2id algorithm to use 19MB of memory, 
+// perform 2 iterations, run on a single thread, and generate a 32-byte hash. 
+// These values balance security and performance for password hashing.
+const ARGON_CONFIG = {
+    type: argon2.argon2id,
+    memoryCost: 19456,
+    timeCost: 2,
+    parallelism: 1,
+    hashLength: 32
+};
+
 // Function to fetch the profile details of a user based on their user ID
 const profileData = async (userID) => {
     // Fetch the user from the database using the provided user ID
@@ -22,8 +34,12 @@ const profileData = async (userID) => {
 
 // Function to update a user's profile based on validated data
 const updateProfile = async (validatedData, userID) => {
+
     // If the password is included in the validated data, hash it before updating
-    if (validatedData.password) validatedData.password = await argon2.hash(validatedData.password)
+    if (validatedData.password) {
+        validatedData.password = await argon2.hash(validatedData.password, ARGON_CONFIG)
+        validatedData.password_changed_at = new Date()
+    }
 
     // Update the user's profile in the database using the provided data
     const updatedUser = await prisma.user.update({

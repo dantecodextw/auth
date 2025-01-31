@@ -20,7 +20,9 @@ const signup = new ValidationHelper({
     email: joi.string().email().required(),
 
     // Password: Must be a string with a minimum length of 6 characters, and it is required
-    password: joi.string().min(6).required()
+    password: joi.string().min(6).required(),
+
+    test: joi.string()
 });
 
 // ================= LOGIN VALIDATION SCHEMA =================
