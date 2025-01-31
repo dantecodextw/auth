@@ -17,16 +17,36 @@ const PRISMA_ERROR_MAP = {
 const NODE_ENV = process.env.NODE_ENV || 'production';
 
 const parseValidationError = (message) => {
+    // Match type mismatch errors like "Expected X, received Y"
+    const typeMismatchMatch = message.match(/Expected (.+?), provided (\w+)/);
+    if (typeMismatchMatch) {
+        return {
+            expectedType: typeMismatchMatch[1],
+            receivedType: typeMismatchMatch[2],
+            message: `Expected ${typeMismatchMatch[1]} but received ${typeMismatchMatch[2]}`
+        };
+    }
+
+    // Match invalid value errors
+    const valueMatch = message.match(/Got invalid value (.+?) at/);
+    if (valueMatch) {
+        return {
+            invalidValue: valueMatch[1].replace(/'/g, ''),
+            message: `Invalid value format: ${valueMatch[1]}`
+        };
+    }
+
+    // Match unknown arguments
     const fieldMatch = message.match(/Unknown argument `(\w+)`/);
-    const valueMatch = message.match(/Got invalid value (.+?) for/);
-    const typeMatch = message.match(/Expected (.+?), provided/);
+    if (fieldMatch) {
+        return {
+            unknownField: fieldMatch[1],
+            message: `Unexpected field: ${fieldMatch[1]}`
+        };
+    }
 
-    const details = {};
-    if (fieldMatch) details.field = fieldMatch[1];
-    if (valueMatch) details.invalidValue = valueMatch[1].replace(/'/g, '');
-    if (typeMatch) details.expectedType = typeMatch[1];
-
-    return Object.keys(details).length ? details : null;
+    // Fallback for other validation errors
+    return { message: message };
 };
 
 const handlePrismaError = (error) => {
@@ -99,10 +119,14 @@ const globalErrorHandler = (error, req, res, next) => {
     };
 
     // Handle Prisma errors
-    if (error instanceof Prisma.PrismaClientKnownRequestError ||
-        error instanceof Prisma.PrismaClientValidationError ||
-        error instanceof Prisma.PrismaClientInitializationError ||
-        error instanceof Prisma.PrismaClientRustPanicError) {
+    if (
+        // error instanceof Prisma.PrismaClientKnownRequestError ||
+        // error instanceof Prisma.PrismaClientValidationError ||
+        // error instanceof Prisma.PrismaClientInitializationError ||
+        // error instanceof Prisma.PrismaClientRustPanicError
+        // error instanceof Prisma.PrismaClientError ||
+        error.constructor.name.startsWith('PrismaClient')
+    ) {
         error = handlePrismaError(error);
     }
 
