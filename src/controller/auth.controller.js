@@ -1,43 +1,41 @@
 // Import dependencies
-import prisma from "../../prisma/client/prismaClient.js"; // Database client
-import authService from "../service/auth.service.js"; // Business logic layer
-import apiResponseHandler from "../utils/apiResponseHandler.js"; // Standardized response formatter
-import asyncErrorHandler from "../utils/asyncErrorHandler.js"; // Error handling wrapper
-import CustomError from "../utils/customErrorHandler.js"; // Custom error class
-import userValidation from "../validation/auth.validation.js"; // Joi validation schemas
+import authService from "../service/auth.service.js"; // Handles business logic for authentication
+import apiResponseHandler from "../utils/apiResponseHandler.js"; // Formats standardized API responses
+import asyncErrorHandler from "../utils/asyncErrorHandler.js"; // Wraps async functions to catch errors
+import userValidation from "../validation/auth.validation.js"; // Joi schemas for validating authentication data
 
-// Signup controller wrapped in error handling middleware
+// Signup controller wrapped in async error handling middleware
 const signup = asyncErrorHandler(async (req, res) => {
     // ===== VALIDATION PHASE =====
-    const validatedData = userValidation.signup.validate(req.body)
+    // Validate request body using the signup schema
+    const validatedData = userValidation.signup.validate(req.body);
 
     // ===== SERVICE CALL =====
-    // Pass validated data to service layer for business logic
+    // Process the signup logic using the validated data through the service layer
     const newUser = await authService.signup(validatedData);
 
     // ===== RESPONSE =====
-    // Send standardized success response with 201 Created status
+    // Return a 201 Created response with a standardized success message and the new user data
     res.status(201).json(apiResponseHandler("Signup successful", newUser));
 });
 
-// Login controller with similar structure
+// Login controller wrapped in async error handling middleware
 const login = asyncErrorHandler(async (req, res) => {
-    // Validate login credentials format
+    // ===== VALIDATION PHASE =====
+    // Validate login credentials using the login schema
+    // (Note: Without a validation helper, you would need to manually throw a CustomError for each failure)
+    const validatedData = userValidation.login.validate(req.body);
 
-    // Will explain how not having validation helper class would result into writing customerror for each api
-    // const { error, value } = userValidation.login.validate(req.body);
-    // if (error) throw new CustomError(error.details[0].message, 400, error.details);
-
-    const validatedData = userValidation.login.validate(req.body)
-
-    // Authenticate user through service layer
+    // ===== SERVICE CALL =====
+    // Process login logic and authenticate the user via the service layer
     const user = await authService.login(validatedData);
 
-    // Return success response with auth tokens/user data
+    // ===== RESPONSE =====
+    // Return a 200 OK response with a standardized success message and the authenticated user data
     res.status(200).json(apiResponseHandler("Login successful", user));
 });
 
-// Export controllers as named methods
+// Export the controllers as named properties for use in routing
 export default {
     signup,
     login

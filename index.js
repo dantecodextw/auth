@@ -1,67 +1,83 @@
-// Core Dependencies
-import express from "express";
-import cors from "cors";
-import helmet from "helmet"; // Added security headers
-import rateLimit from "express-rate-limit"; // Added rate limiting
-import compression from "compression"; // Added response compression
-import logger from "./src/utils/logger.js"; // Custom logger instead of console.log
-import httpErrors from "http-errors"; // Standard HTTP error objects
+// ======== IMPORT DEPENDENCIES ========
 
-// Project Modules
-import apiRouter from "./src/api/mainRouter.js";
-import globalErrorHandler from "./src/utils/globalErrorHandler.js";
-import requestId from "./src/middleware/requestId.js";
-import rateLimiter from "./src/utils/rateLimiter.js";
+// Built-in Libraries and Middleware
+import express from "express";                   // Web framework for handling HTTP requests
+import cors from "cors";                         // Middleware to enable Cross-Origin Resource Sharing
+import helmet from "helmet";                     // Sets various HTTP headers for improved security
+import compression from "compression";           // Compresses response bodies for better performance
+import httpErrors from "http-errors";            // Creates standard HTTP error objects
 
-// Configuration Validation
+// Custom Modules for Application Logic
+import logger from "./src/utils/logger.js";      // Custom logger (replaces console.log)
+import apiRouter from "./src/api/mainRouter.js";   // Router that contains API endpoints
+import globalErrorHandler from "./src/utils/globalErrorHandler.js"; // Handles errors across the app
+import requestId from "./src/middleware/requestId.js";  // Middleware to attach a unique ID to each request
+import rateLimiter from "./src/utils/rateLimiter.js";     // Custom rate limiting configuration
+
+// ======== ENVIRONMENT CONFIGURATION VALIDATION ========
+
+// List of environment variables required for production
 const requiredEnvVars = ['NODE_ENV', 'CORS_ORIGINS'];
 if (process.env.NODE_ENV === 'production') {
     requiredEnvVars.forEach(varName => {
         if (!process.env[varName]) {
             logger.error(`Missing required environment variable: ${varName}`);
-            process.exit(1);
+            process.exit(1); // Terminate the app if a required variable is missing
         }
     });
 }
 
-// Express Application Setup
+// ======== EXPRESS APPLICATION SETUP ========
 const app = express();
 
-// ================= SECURITY MIDDLEWARE =================
+// ======== SECURITY MIDDLEWARE ========
+
+// Set security-related HTTP headers using Helmet
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'"], // Tighten for production
+            scriptSrc: ["'self'", "'unsafe-inline'"], // Consider tightening this for production use
             styleSrc: ["'self'", "'unsafe-inline'"]
         }
     }
 }));
 
-// Rate Limiting (adjust values based on requirements)
-app.use(rateLimiter(1000, '1h'))
+// Apply rate limiting to protect against excessive requests (e.g., 1000 requests per hour)
+app.use(rateLimiter(1000, '1h'));
 
-app.use(requestId)
+// Attach a unique ID to each request for easier tracking in logs
+app.use(requestId);
 
-// ================= PERFORMANCE MIDDLEWARE =================
+// ======== PERFORMANCE MIDDLEWARE ========
+
+// Compress response bodies to speed up the delivery of assets
 app.use(compression());
 
-// ================= REQUEST PROCESSING =================
+// ======== BODY PARSING MIDDLEWARE ========
+
+// Parse incoming JSON requests, limiting the size to 10kb to prevent abuse
 app.use(express.json({ limit: '10kb' }));
+
+// Parse URL-encoded data from requests, also with a 10kb size limit
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
-// CORS Configuration
+// ======== CORS (CROSS-ORIGIN RESOURCE SHARING) CONFIGURATION ========
+
 const corsOptions = {
-    origin: process.env.CORS_ORIGINS?.split(',') || '*',
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: process.env.NODE_ENV === 'production',
-    optionsSuccessStatus: 200 // Legacy browser support
+    origin: process.env.CORS_ORIGINS?.split(',') || '*', // Allow specific origins if provided, otherwise allow all
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],    // Allowed HTTP methods
+    allowedHeaders: ['Content-Type', 'Authorization'],     // Allowed headers
+    credentials: process.env.NODE_ENV === 'production',      // Enable credentials in production
+    optionsSuccessStatus: 200                                // Use 200 for legacy browser support
 };
 
+// Enable CORS using the defined options
 app.use(cors(corsOptions));
 
-// ================= LOGGING MIDDLEWARE =================
+// ======== REQUEST LOGGING ========
+
+// Log details of every incoming request, including method, URL, request ID, IP, and user agent
 app.use((req, res, next) => {
     logger.info(`${req.method} ${req.originalUrl}`, {
         requestId: req.requestId,
@@ -71,10 +87,12 @@ app.use((req, res, next) => {
     next();
 });
 
-// ================= ROUTES =================
-app.use('/api/v1', apiRouter); // Apply rate limiting to API
+// ======== ROUTE HANDLERS ========
 
-// ================= HEALTH CHECK =================
+// API routes: all endpoints under '/api/v1' are handled by the apiRouter
+app.use('/api/v1', apiRouter);
+
+// Health Check: simple endpoint to verify that the server is running
 app.get('/health', (req, res) => {
     res.status(200).json({
         status: 'ok',
@@ -82,22 +100,24 @@ app.get('/health', (req, res) => {
     });
 });
 
-// ================= ERROR HANDLING =================
-// 404 Handler
+// ======== ERROR HANDLING ========
+
+// Handle all unmatched routes by creating a 404 Not Found error
 app.use('*', (req, res, next) => {
     next(httpErrors.NotFound(`Resource not found: ${req.originalUrl}`));
 });
 
-// Global Error Handler
+// Use a global error handler to manage errors consistently
 app.use(globalErrorHandler);
 
-// ================= SERVER MANAGEMENT =================
+// ======== SERVER START-UP AND GRACEFUL SHUTDOWN ========
+
 const PORT = process.env.PORT || 2000;
 const server = app.listen(PORT, () => {
-    logger.info(`Server operational in ${process.env.NODE_ENV} mode on port ${PORT}`);
+    logger.info(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
 });
 
-// Graceful Shutdown
+// Function to gracefully shut down the server upon receiving termination signals
 const shutdown = (signal) => {
     logger.info(`${signal} received: Closing HTTP server`);
     server.close(() => {
@@ -106,5 +126,6 @@ const shutdown = (signal) => {
     });
 };
 
+// Listen for termination signals to trigger graceful shutdown
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);

@@ -1,23 +1,25 @@
 // globalErrorHandler.js
+
 import CustomError from "./customErrorHandler.js";
 import logger from "./logger.js";
 import { Prisma } from '@prisma/client';
 
-// Map Prisma error codes to HTTP status codes
+// Map specific Prisma error codes to corresponding HTTP status codes.
 const PRISMA_ERROR_MAP = {
-    P2002: 409, // Unique constraint violation
-    P2003: 409, // Foreign key constraint
-    P2025: 404, // Record not found
-    P2016: 400, // Invalid data format
+    P2002: 409, // Unique constraint violation (duplicate entry)
+    P2003: 409, // Foreign key constraint failure
+    P2025: 404, // Record not found in the database
+    P2016: 400, // Invalid data format provided
     P2021: 503, // Database table not found
     P2022: 503, // Database column not found
-    P1017: 503, // Database connection closed
+    P1017: 503, // Database connection was closed unexpectedly
 };
 
 const NODE_ENV = process.env.NODE_ENV || 'production';
 
+// Function to parse and extract details from Prisma validation error messages.
 const parseValidationError = (message) => {
-    // Match type mismatch errors like "Expected X, received Y"
+    // Look for type mismatch errors, e.g., "Expected X, provided Y"
     const typeMismatchMatch = message.match(/Expected (.+?), provided (\w+)/);
     if (typeMismatchMatch) {
         return {
@@ -27,7 +29,7 @@ const parseValidationError = (message) => {
         };
     }
 
-    // Match invalid value errors
+    // Look for errors indicating an invalid value.
     const valueMatch = message.match(/Got invalid value (.+?) at/);
     if (valueMatch) {
         return {
@@ -36,7 +38,7 @@ const parseValidationError = (message) => {
         };
     }
 
-    // Match unknown arguments
+    // Look for errors with unknown or unexpected arguments.
     const fieldMatch = message.match(/Unknown argument `(\w+)`/);
     if (fieldMatch) {
         return {
@@ -45,12 +47,13 @@ const parseValidationError = (message) => {
         };
     }
 
-    // Fallback for other validation errors
+    // If none of the above match, return the original message.
     return { message: message };
 };
 
+// Function to handle and standardize Prisma errors.
 const handlePrismaError = (error) => {
-    // Handle known request errors
+    // Handle known request errors from Prisma.
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
         const statusCode = PRISMA_ERROR_MAP[error.code] || 500;
         const errorMeta = error.meta || {};
@@ -68,12 +71,13 @@ const handlePrismaError = (error) => {
             statusCode,
             {
                 prismaCode: error.code,
+                // Include additional error meta only in development mode.
                 ...(NODE_ENV === 'development' && { meta: error.meta })
             }
         );
     }
 
-    // Handle validation errors
+    // Handle Prisma validation errors by parsing the error message.
     if (error instanceof Prisma.PrismaClientValidationError) {
         const details = parseValidationError(error.message);
         return new CustomError(
@@ -83,7 +87,7 @@ const handlePrismaError = (error) => {
         );
     }
 
-    // Handle initialization errors
+    // Handle errors occurring during Prisma initialization (e.g., connection issues).
     if (error instanceof Prisma.PrismaClientInitializationError) {
         logger.error('Prisma startup failed:', error);
         return new CustomError(
@@ -93,7 +97,7 @@ const handlePrismaError = (error) => {
         );
     }
 
-    // Handle runtime engine crashes
+    // Handle critical runtime errors from Prisma's engine.
     if (error instanceof Prisma.PrismaClientRustPanicError) {
         logger.fatal('Prisma engine crashed:', error);
         return new CustomError(
@@ -103,34 +107,32 @@ const handlePrismaError = (error) => {
         );
     }
 
+    // If the error does not match any Prisma-specific type, return it unchanged.
     return error;
 };
 
+// Global error handler middleware for Express.
 const globalErrorHandler = (error, req, res, next) => {
-    // Standardize error properties
+    // Set default status code and status if not already provided.
     error.statusCode = error.statusCode || 500;
     error.status = error.status || 'error';
 
-    // Add request context
+    // Add request-specific context to the error.
     error.request = {
         method: req.method,
         path: req.path,
         timestamp: new Date().toISOString()
     };
 
-    // Handle Prisma errors
+    // Check if the error is related to Prisma by inspecting its constructor name.
     if (
-        // error instanceof Prisma.PrismaClientKnownRequestError ||
-        // error instanceof Prisma.PrismaClientValidationError ||
-        // error instanceof Prisma.PrismaClientInitializationError ||
-        // error instanceof Prisma.PrismaClientRustPanicError
-        // error instanceof Prisma.PrismaClientError ||
+        // Instead of checking for specific Prisma error types, we use the constructor name.
         error.constructor.name.startsWith('PrismaClient')
     ) {
         error = handlePrismaError(error);
     }
 
-    // Structured logging
+    // Log the error with structured details.
     logger.error({
         message: error.message,
         code: error.code || 'INTERNAL_ERROR',
@@ -142,7 +144,7 @@ const globalErrorHandler = (error, req, res, next) => {
         ...(NODE_ENV === 'development' && { stack: error.stack })
     });
 
-    // Construct response
+    // Build the response object to be sent back to the client.
     const response = {
         success: false,
         status: error.status,
@@ -154,7 +156,7 @@ const globalErrorHandler = (error, req, res, next) => {
         })
     };
 
-    // Production security cleanup
+    // In production, hide sensitive error details if the error is not operational.
     if (NODE_ENV === 'production') {
         if (!error.isOperational) {
             response.message = 'An unexpected error occurred';
@@ -166,12 +168,13 @@ const globalErrorHandler = (error, req, res, next) => {
     res.status(error.statusCode).json(response);
 };
 
-// Handle uncaught exceptions/rejections
+// Listen for uncaught exceptions and log them before exiting the process.
 process.on('uncaughtException', (error) => {
     logger.fatal('Uncaught Exception:', error);
     process.exit(1);
 });
 
+// Listen for unhandled promise rejections and log them before exiting the process.
 process.on('unhandledRejection', (reason) => {
     logger.fatal('Unhandled Rejection:', reason);
     process.exit(1);
